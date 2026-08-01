@@ -1,253 +1,219 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>জাফর ৪২০ - সুজুকি জিক্সার অফার</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #f2f2f2; }
-    header { background: #0d6efd; color: white; padding: 18px; text-align: center; }
-    header h1 { margin: 0; font-size: 20px; }
-    header p { margin: 6px 0 0 0; font-size: 13px; }
-    .container { max-width: 950px; margin: 15px auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0px 0px 12px rgba(0,0,0,0.1); }
+<title>Duty Roster</title>
 
-    .nav { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; }
-    .nav button { flex: 1; padding: 10px 5px; border: none; cursor: pointer; border-radius: 8px; font-size: 13px; background: #0d6efd; color: white; font-weight: bold; }
-    .nav .btn-verify { background: #6f42c1; }
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f2f6ff;
+    padding:20px;
+}
 
-    h2 { color: #0d6efd; font-size: 18px; margin-bottom: 10px; }
-    label { font-weight: bold; display: block; margin-top: 12px; margin-bottom: 6px; font-size: 14px; }
-    input { width: 100%; padding: 10px; font-size: 14px; border-radius: 6px; border: 1px solid #ccc; outline: none; box-sizing: border-box; }
-    
-    .btn-submit { margin-top: 15px; padding: 12px; border: none; width: 100%; background: #198754; color: white; font-size: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-    .btn-pay { width: 100%; padding: 10px; background: #ffc107; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-    .active-pay { background: #0dcaf0 !important; color: black; }
+.container{
+    max-width:700px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 0 15px #ccc;
+}
 
-    .card { margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; border: 1px solid #ddd; }
-    .hidden { display: none; }
+h2{
+    text-align:center;
+    color:#1565c0;
+}
 
-    /* ড্যাশবোর্ড সার্কেল */
-    .dashboard-circle {
-      width: 280px; height: 280px; background: radial-gradient(circle, #0d6efd, #084298);
-      border-radius: 50%; margin: 30px auto; display: flex; flex-direction: column;
-      justify-content: center; align-items: center; color: white; border: 8px solid #fff;
-      box-shadow: 0px 0px 20px rgba(0,0,0,0.2); text-align: center;
-    }
-    .circle-item b { font-size: 24px; display: block; }
-    .circle-item span { font-size: 12px; text-transform: uppercase; opacity: 0.9; }
+input,button{
+    padding:10px;
+    margin:5px;
+    border-radius:8px;
+    border:1px solid #aaa;
+}
 
-    /* এডমিন নেভিগেশন "- - -" */
-    .admin-nav { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 15px; }
-    .admin-nav button { background: #f8f9fa; border: 1px solid #0d6efd; color: #0d6efd; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
-    .admin-nav button.active { background: #0d6efd; color: white; }
-    .divider { color: #aaa; font-weight: bold; }
+button{
+    background:#1565c0;
+    color:white;
+    cursor:pointer;
+}
 
-    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-    th { background: #f1f1f1; }
-    .del-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-  </style>
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th,td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+}
+
+th{
+    background:#1565c0;
+    color:white;
+}
+
+.off{
+    background:#ffdddd;
+    color:red;
+    font-weight:bold;
+}
+
+.shift1{
+    background:#e3f2fd;
+}
+
+.shift2{
+    background:#fff3e0;
+}
+
+.shift3{
+    background:#ede7f6;
+}
+</style>
+
 </head>
 
 <body>
 
-<header>
-  <h1> জাফর ৪২০ - ১০০ টাকায় সুজুকি জিক্সার বাইক জেতার সুযোগ</h1>
-  <p>টিকিট কাটুন এবং ড্র-তে অংশ নিন</p>
-</header>
-
 <div class="container">
 
-  <div class="nav" id="mainMenu">
-    <button onclick="toggleSection('publicBox')">🎫 টিকিট কাটুন</button>
-    <button class="btn-verify" onclick="toggleSection('verifyBox')">🔍 টিকিট যাচাই</button>
-    <button onclick="toggleSection('loginBox')" style="background:#343a40;">🔒 এডমিন লগইন</button>
-  </div>
+<h2>মাসিক ডিউটি রোস্টার</h2>
 
-  <div id="publicBox" class="section-item hidden">
-    <h2>🎟️ টিকিট কাটুন</h2>
-    <p style="font-size: 13px; color: #666; border-bottom: 1px solid #eee; padding-bottom: 10px;">শুধুমাত্র ১০০ টাকার বিনিময়ে পেয়ে যাচ্ছেন সুজুকি জিক্সার বাইক জাফর ৪২০ পেজের পক্ষ থেকে।</p>
-    <label>আপনার নাম</label>
-    <input type="text" id="uName" placeholder="পূর্ণ নাম লিখুন">
-    <label>মোবাইল নাম্বার</label>
-    <input type="text" id="uMob" placeholder="01XXXXXXXXX">
-    
-    <label>পেমেন্ট মেথড (এক চাপে ওপেন/হাইড)</label>
-    <div style="display:flex; gap:10px;">
-      <button class="btn-pay" id="bBtn" onclick="togglePayment('bkash')">📌 বিকাশ</button>
-      <button class="btn-pay" id="nBtn" onclick="togglePayment('nagad')">📌 নগদ</button>
-    </div>
-    
-    <div id="payBox" class="card hidden">
-      <h3 id="payTitle" style="margin:0; font-size:16px; color:#0d6efd;"></h3>
-      <p>টাকা পাঠান: <b style="color:#dc3545; font-size:18px;">01723639792</b> (পার্সোনাল)</p>
-    </div>
-    
-    <input type="hidden" id="payMethod">
-    <label>ট্রানজেকশন আইডি (TrxID)</label>
-    <input type="text" id="trxId" placeholder="TRX123456">
-    <button class="btn-submit" onclick="submitTicket()">✅ সাবমিট করুন</button>
-  </div>
+<label>মাস নির্বাচন করুন:</label>
+<input type="month" id="month">
 
-  <div id="verifyBox" class="section-item hidden">
-    <h2>🔍 আপনার টিকিট যাচাই</h2>
-    <input type="text" id="vInput" placeholder="টিকিট বা মোবাইল নাম্বার">
-    <button class="btn-submit" style="background:#6f42c1;" onclick="publicVerify()">যাচাই করুন</button>
-    <div id="vRes" class="card hidden"></div>
-  </div>
+<button onclick="createDuty()">হিসাব করুন</button>
 
-  <div id="loginBox" class="section-item hidden">
-    <h2>🔒 এডমিন লগইন</h2>
-    <input type="text" id="admU" placeholder="admin">
-    <input type="password" id="admP" placeholder="1234">
-    <button class="btn-submit" onclick="adminLogin()">লগইন</button>
-  </div>
+<table>
+<thead>
+<tr>
+<th>তারিখ</th>
+<th>বার</th>
+<th>ডিউটি</th>
+<th>সময়</th>
+</tr>
+</thead>
 
-  <div id="adminDashboard" class="section-item hidden">
-    <div class="admin-nav">
-      <button id="btn1" class="active" onclick="toggleAdminTab('dbTab', 'btn1')">📊 ড্যাশবোর্ড</button>
-      <span class="divider">-</span>
-      <button id="btn2" onclick="toggleAdminTab('appTab', 'btn2')">✅ এপ্রুভ</button>
-      <span class="divider">-</span>
-      <button id="btn3" onclick="toggleAdminTab('verTab', 'btn3')">🔍 যাচাই ও ডাটা</button>
-      <span class="divider">-</span>
-      <button style="border-color:#dc3545; color:#dc3545;" onclick="location.reload()">🔒 লগআউট</button>
-    </div>
+<tbody id="result"></tbody>
 
-    <div id="adminTabContent">
-      <div id="dbTab">
-        <div class="dashboard-circle">
-            <div class="circle-item"><span>মোট টিকিট</span><b id="totalCount">0</b></div>
-            <div style="width:60%; height:1px; background:rgba(255,255,255,0.3); margin:10px 0;"></div>
-            <div style="display:flex; gap:30px;">
-                <div class="circle-item"><span>এপ্রুভ</span><b id="appCount">0</b></div>
-                <div class="circle-item"><span>পেন্ডিং</span><b id="penCount">0</b></div>
-            </div>
-        </div>
-      </div>
-      <div id="appTab" class="hidden">
-        <h2>✅ সরাসরি এপ্রুভ</h2>
-        <div class="card"><input type="text" id="appTrxInput" placeholder="TrxID দিন"><button class="btn-submit" onclick="doApprove()">এপ্রুভ করুন</button></div>
-      </div>
-      <div id="verTab" class="hidden">
-        <div class="card">
-          <input type="text" id="admSearchInput" placeholder="TrxID / Mobile...">
-          <button class="btn-submit" onclick="adminSearch()">সার্চ ডাটা</button>
-          <div id="admSearchRes" class="card hidden"></div>
-        </div>
-        <div class="card" style="overflow-x:auto;"><table id="admTable"></table></div>
-      </div>
-    </div>
-  </div>
+</table>
 
 </div>
 
+
 <script>
-  function getD() { return JSON.parse(localStorage.getItem('tickets')) || []; }
-  function setD(d) { localStorage.setItem('tickets', JSON.stringify(d)); }
 
-  function toggleSection(id) {
-    let t = document.getElementById(id);
-    let isH = t.classList.contains('hidden');
-    document.querySelectorAll('.section-item').forEach(s => s.classList.add('hidden'));
-    if(isH) t.classList.remove('hidden');
-  }
-
-  // পেমেন্ট বাটনের জন্য টগল সিস্টেম
-  function togglePayment(m) {
-    let payBox = document.getElementById('payBox');
-    let payMethodInput = document.getElementById('payMethod');
-    let currentMethod = payMethodInput.value;
-
-    if (currentMethod === m && !payBox.classList.contains('hidden')) {
-      // যদি একই বাটনে আবার চাপ দেওয়া হয়, তবে হাইড হবে
-      payBox.classList.add('hidden');
-      payMethodInput.value = "";
-      document.getElementById('bBtn').classList.remove('active-pay');
-      document.getElementById('nBtn').classList.remove('active-pay');
-    } else {
-      // নতুন পেমেন্ট মেথড ওপেন হবে
-      payBox.classList.remove('hidden');
-      document.getElementById('payTitle').innerText = (m === 'bkash' ? 'বিকাশ' : 'নগদ') + " পেমেন্ট";
-      payMethodInput.value = m;
-      document.getElementById('bBtn').classList.toggle('active-pay', m === 'bkash');
-      document.getElementById('nBtn').classList.toggle('active-pay', m === 'nagad');
+const shifts = [
+    {
+        name:"Shift 1",
+        time:"06:00 AM - 02:00 PM"
+    },
+    {
+        name:"Shift 2",
+        time:"02:00 PM - 10:00 PM"
+    },
+    {
+        name:"Shift 3",
+        time:"10:00 PM - 06:00 AM"
     }
-  }
+];
 
-  function submitTicket() {
-    let n = document.getElementById('uName').value;
-    let m = document.getElementById('uMob').value;
-    let trx = document.getElementById('trxId').value;
-    let meth = document.getElementById('payMethod').value;
-    if(!n || !m || !trx || !meth) return alert("তথ্য পূরণ করুন!");
-    let d = getD();
-    let tNo = "705" + Math.floor(100000 + Math.random() * 900000);
-    d.push({name:n, mobile:m, trxId:trx, ticketNumber:tNo, status:'Pending', method:meth});
-    setD(d);
-    alert("সফল! আপনার টিকিট: " + tNo);
-    location.reload();
-  }
 
-  function adminLogin() {
-    if(document.getElementById('admU').value==='admin' && document.getElementById('admP').value==='1234') {
-      document.getElementById('mainMenu').classList.add('hidden');
-      toggleSection('adminDashboard');
-      updateStats();
-    } else alert("ভুল তথ্য!");
-  }
+function createDuty(){
 
-  function toggleAdminTab(tabId, btnId) {
-    ['dbTab', 'appTab', 'verTab'].forEach(t => document.getElementById(t).classList.add('hidden'));
-    document.getElementById(tabId).classList.remove('hidden');
-    ['btn1', 'btn2', 'btn3'].forEach(b => document.getElementById(b).classList.remove('active'));
-    document.getElementById(btnId).classList.add('active');
-    if(tabId === 'verTab') loadTable();
-    updateStats();
-  }
+let monthValue=document.getElementById("month").value;
 
-  function updateStats() {
-    let d = getD();
-    document.getElementById('totalCount').innerText = d.length;
-    document.getElementById('appCount').innerText = d.filter(x => x.status === 'Approved').length;
-    document.getElementById('penCount').innerText = d.filter(x => x.status === 'Pending').length;
-  }
+if(!monthValue){
+    alert("মাস নির্বাচন করুন");
+    return;
+}
 
-  function loadTable() {
-    let d = getD();
-    let h = "<thead><tr><th>তথ্য</th><th>TrxID</th><th>একশন</th></tr></thead><tbody>";
-    d.forEach((item, i) => {
-      h += `<tr><td>${item.name}<br>#${item.ticketNumber}</td><td>${item.trxId}</td><td><button class="del-btn" onclick="del(${i})">Del</button></td></tr>`;
-    });
-    document.getElementById('admTable').innerHTML = h + "</tbody>";
-  }
 
-  function doApprove() {
-    let trx = document.getElementById('appTrxInput').value;
-    let d = getD();
-    let f = d.find(x => x.trxId === trx);
-    if(f) { f.status = 'Approved'; setD(d); alert("এপ্রুভড!"); updateStats(); } else alert("আইডি নেই!");
-  }
+let [year,month]=monthValue.split("-");
 
-  function adminSearch() {
-    let val = document.getElementById('admSearchInput').value;
-    let f = getD().find(x => x.trxId === val || x.mobile === val || x.ticketNumber === val);
-    let res = document.getElementById('admSearchRes');
-    if(f) { res.classList.remove('hidden'); res.innerHTML = `নাম: ${f.name}<br>টিকিট: ${f.ticketNumber}<br>স্ট্যাটাস: ${f.status}`; }
-    else alert("পাওয়া যায়নি!");
-  }
+let days=new Date(year,month,0).getDate();
 
-  function del(i) { if(confirm("ডিলিট?")) { let d = getD(); d.splice(i,1); setD(d); loadTable(); updateStats(); } }
+let html="";
 
-  function publicVerify() {
-    let v = document.getElementById('vInput').value;
-    let t = getD().find(x => x.ticketNumber === v || x.mobile === v);
-    if(t) {
-      document.getElementById('vRes').classList.remove('hidden');
-      document.getElementById('vRes').innerHTML = `✅ নাম: ${t.name}<br>টিকিট: ${t.ticketNumber}<br>স্ট্যাটাস: ${t.status}`;
-    } else alert("পাওয়া যায়নি!");
-  }
+let shiftIndex=0;
+
+
+for(let d=1; d<=days; d++){
+
+let date=new Date(year,month-1,d);
+
+let dayName=date.toLocaleDateString("bn-BD",
+{
+weekday:"long"
+});
+
+
+let duty="";
+let time="";
+let cls="";
+
+
+/* শুক্রবার Off */
+if(date.getDay()==5){
+
+    duty="OFF DAY";
+    time="-";
+    cls="off";
+
+}
+else{
+
+    duty=shifts[shiftIndex].name;
+    time=shifts[shiftIndex].time;
+
+    cls="shift"+(shiftIndex+1);
+
+    shiftIndex++;
+
+    if(shiftIndex>=3){
+        shiftIndex=0;
+    }
+
+}
+
+
+html += `
+<tr class="${cls}">
+<td>${d}-${month}-${year}</td>
+<td>${dayName}</td>
+<td>${duty}</td>
+<td>${time}</td>
+</tr>
+`;
+
+}
+
+
+document.getElementById("result").innerHTML=html;
+
+}
+
+
+// আজকের মাস অটো সেট
+
+let today=new Date();
+
+let m=today.getMonth()+1;
+
+if(m<10) m="0"+m;
+
+document.getElementById("month").value=
+today.getFullYear()+"-"+m;
+
+
+createDuty();
+
 </script>
+
 </body>
 </html>
