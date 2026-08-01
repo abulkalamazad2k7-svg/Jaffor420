@@ -4,52 +4,94 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Duty Roster</title>
+<title>Smart Duty Roster</title>
 
 <style>
 body{
-    font-family: Arial, sans-serif;
-    background:#f2f6ff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:#eef2f5;
     padding:20px;
+    margin:0;
 }
 
 .container{
-    max-width:700px;
+    max-width:750px;
     margin:auto;
     background:white;
-    padding:20px;
+    padding:25px;
     border-radius:15px;
-    box-shadow:0 0 15px #ccc;
+    box-shadow:0 8px 20px rgba(0,0,0,0.1);
 }
 
 h2{
     text-align:center;
     color:#1565c0;
+    margin-top: 0;
 }
 
-input,button{
-    padding:10px;
-    margin:5px;
+/* বর্তমান সময় প্রদর্শনের ঘড়ি */
+.live-clock {
+    background: #1565c0;
+    color: white;
+    text-align: center;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.controls{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+input, button{
+    padding:10px 15px;
     border-radius:8px;
-    border:1px solid #aaa;
+    border:1px solid #ccc;
+    font-size: 14px;
 }
 
 button{
     background:#1565c0;
     color:white;
     cursor:pointer;
+    border: none;
+    font-weight: bold;
+    transition: background 0.3s;
+    margin-top: auto;
+}
+
+button:hover{
+    background:#0d47a1;
 }
 
 table{
     width:100%;
     border-collapse:collapse;
-    margin-top:20px;
+    margin-top:10px;
 }
 
-th,td{
-    border:1px solid #ddd;
-    padding:10px;
+th, td{
+    border:1px solid #e0e0e0;
+    padding:12px 8px;
     text-align:center;
+    font-size: 14px;
 }
 
 th{
@@ -58,21 +100,33 @@ th{
 }
 
 .off{
-    background:#ffdddd;
-    color:red;
+    background:#ffebee;
+    color:#c62828;
     font-weight:bold;
 }
 
-.shift1{
-    background:#e3f2fd;
+.shift1{ background:#e3f2fd; }
+.shift2{ background:#fff3e0; }
+.shift3{ background:#ede7f6; }
+
+/* স্ট্যাটাস ব্যাজসমূহ */
+.badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
 }
 
-.shift2{
-    background:#fff3e0;
-}
+.badge-running { background: #4caf50; color: white; }
+.badge-finished { background: #9e9e9e; color: white; }
+.badge-upcoming { background: #2196f3; color: white; }
+.badge-off { background: #e53935; color: white; }
 
-.shift3{
-    background:#ede7f6;
+.timer-text {
+    font-size: 11px;
+    color: #555;
+    margin-top: 3px;
 }
 </style>
 
@@ -82,20 +136,33 @@ th{
 
 <div class="container">
 
-<h2>মাসিক ডিউটি রোস্টার</h2>
+<h2>স্মার্ট ডিউটি রোস্টার</h2>
 
-<label>মাস নির্বাচন করুন:</label>
-<input type="month" id="month">
+<!-- লাইভ টাইম ক্লক -->
+<div class="live-clock" id="liveClock">
+    বর্তমান সময়: লোড হচ্ছে...
+</div>
 
-<button onclick="createDuty()">হিসাব করুন</button>
+<div class="controls">
+    <div class="control-group">
+        <label>মাস:</label>
+        <input type="month" id="month">
+    </div>
+    <div class="control-group">
+        <label>তারিখ (একদিনের জন্য):</label>
+        <input type="date" id="selectedDate">
+    </div>
+    <button onclick="createDuty()">ফিল্টার করুন</button>
+    <button onclick="showAllMonth()" style="background:#455a64;">পুরা মাস দেখুন</button>
+</div>
 
 <table>
 <thead>
 <tr>
 <th>তারিখ</th>
 <th>বার</th>
-<th>ডিউটি</th>
-<th>সময়</th>
+<th>ডিউটি ও সময়</th>
+<th>অবস্থা (স্ট্যাটাস)</th>
 </tr>
 </thead>
 
@@ -109,109 +176,144 @@ th{
 <script>
 
 const shifts = [
-    {
-        name:"Shift 1",
-        time:"06:00 AM - 02:00 PM"
-    },
-    {
-        name:"Shift 2",
-        time:"02:00 PM - 10:00 PM"
-    },
-    {
-        name:"Shift 3",
-        time:"10:00 PM - 06:00 AM"
-    }
+    { name: "Shift 1", startHour: 6, endHour: 14, timeText: "06:00 AM - 02:00 PM" },
+    { name: "Shift 2", startHour: 14, endHour: 22, timeText: "02:00 PM - 10:00 PM" },
+    { name: "Shift 3", startHour: 22, endHour: 30, timeText: "10:00 PM - 06:00 AM" } // 30 = পরের দিন সকাল ৬টা
 ];
 
+// লাইভ ঘড়ি আপডেট
+function updateClock() {
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    document.getElementById("liveClock").innerText = "বর্তমান সময়: " + now.toLocaleDateString("bn-BD", options);
+}
+setInterval(updateClock, 1000);
+updateClock();
 
 function createDuty(){
+    let monthValue = document.getElementById("month").value;
+    let dateValue = document.getElementById("selectedDate").value;
 
-let monthValue=document.getElementById("month").value;
-
-if(!monthValue){
-    alert("মাস নির্বাচন করুন");
-    return;
-}
-
-
-let [year,month]=monthValue.split("-");
-
-let days=new Date(year,month,0).getDate();
-
-let html="";
-
-let shiftIndex=0;
-
-
-for(let d=1; d<=days; d++){
-
-let date=new Date(year,month-1,d);
-
-let dayName=date.toLocaleDateString("bn-BD",
-{
-weekday:"long"
-});
-
-
-let duty="";
-let time="";
-let cls="";
-
-
-/* শুক্রবার Off */
-if(date.getDay()==5){
-
-    duty="OFF DAY";
-    time="-";
-    cls="off";
-
-}
-else{
-
-    duty=shifts[shiftIndex].name;
-    time=shifts[shiftIndex].time;
-
-    cls="shift"+(shiftIndex+1);
-
-    shiftIndex++;
-
-    if(shiftIndex>=3){
-        shiftIndex=0;
+    if(!monthValue){
+        alert("মাস নির্বাচন করুন");
+        return;
     }
 
+    let [year, month] = monthValue.split("-");
+    let days = new Date(year, month, 0).getDate();
+    let html = "";
+    let shiftIndex = 0;
+
+    let targetDay = dateValue ? new Date(dateValue).getDate() : null;
+    let targetMonth = dateValue ? new Date(dateValue).getMonth() + 1 : null;
+
+    const now = new Date();
+
+    for(let d = 1; d <= days; d++){
+        // যদি নির্দিষ্ট তারিখ নির্বাচন করা থাকে
+        if (targetDay && targetMonth && (targetDay !== d || targetMonth !== parseInt(month))) {
+            // শিফট ইনডেক্স সঠিক রাখার জন্য আগে ডিউটি স্কিপ হিসাব করা হবে
+            let checkDate = new Date(year, month - 1, d);
+            if(checkDate.getDay() !== 5){
+                shiftIndex = (shiftIndex + 1) % 3;
+            }
+            continue;
+        }
+
+        let date = new Date(year, month - 1, d);
+        let dayName = date.toLocaleDateString("bn-BD", { weekday: "long" });
+
+        let duty = "";
+        let timeText = "";
+        let cls = "";
+        let statusBadge = "";
+        let timerInfo = "";
+
+        /* শুক্রবার Off */
+        if(date.getDay() == 5){
+            duty = "OFF DAY";
+            timeText = "-";
+            cls = "off";
+            statusBadge = `<span class="badge badge-off">ছুটি</span>`;
+        } else {
+            let currentShift = shifts[shiftIndex];
+            duty = currentShift.name;
+            timeText = currentShift.timeText;
+            cls = "shift" + (shiftIndex + 1);
+
+            // সময় হিসাব ও ডিউটি অবস্থার লজিক
+            let shiftStart = new Date(year, month - 1, d, currentShift.startHour, 0, 0);
+            let shiftEnd = new Date(year, month - 1, d, currentShift.endHour, 0, 0);
+
+            if (now > shiftEnd) {
+                statusBadge = `<span class="badge badge-finished">ডিউটি শেষ</span>`;
+            } else if (now >= shiftStart && now <= shiftEnd) {
+                statusBadge = `<span class="badge badge-running">ডিউটি রানিং</span>`;
+                
+                // কত সময় বাকি আছে হিসাব
+                let diffMs = shiftEnd - now;
+                let diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+                let diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                timerInfo = `<div class="timer-text">শেষ হতে বাকি: ${diffHrs} ঘণ্টা ${diffMins} মিনিট</div>`;
+            } else {
+                statusBadge = `<span class="badge badge-upcoming">আসন্ন ডিউটি</span>`;
+                
+                // আজকেরই পরবর্তী শিফট হলে সময় দেখাবে
+                if(now.toDateString() === date.toDateString()){
+                    let diffMs = shiftStart - now;
+                    let diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+                    let diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                    timerInfo = `<div class="timer-text">শুরু হতে বাকি: ${diffHrs} ঘণ্টা ${diffMins} মিনিট</div>`;
+                }
+            }
+
+            shiftIndex = (shiftIndex + 1) % 3;
+        }
+
+        html += `
+        <tr class="${cls}">
+            <td>${d}-${month}-${year}</td>
+            <td>${dayName}</td>
+            <td><strong>${duty}</strong><br><small>${timeText}</small></td>
+            <td>${statusBadge} ${timerInfo}</td>
+        </tr>
+        `;
+    }
+
+    if(html === "") {
+        html = `<tr><td colspan="4">এই তারিখে কোনো তথ্য পাওয়া যায়নি</td></tr>`;
+    }
+
+    document.getElementById("result").innerHTML = html;
 }
 
-
-html += `
-<tr class="${cls}">
-<td>${d}-${month}-${year}</td>
-<td>${dayName}</td>
-<td>${duty}</td>
-<td>${time}</td>
-</tr>
-`;
-
+// পুরো মাসের তথ্য দেখানোর জন্য
+function showAllMonth(){
+    document.getElementById("selectedDate").value = "";
+    createDuty();
 }
 
+// আজকের প্রাথমিক মান সেট
+let today = new Date();
+let m = today.getMonth() + 1;
+if(m < 10) m = "0" + m;
 
-document.getElementById("result").innerHTML=html;
+let d = today.getDate();
+if(d < 10) d = "0" + d;
 
-}
+let yyyy = today.getFullYear();
 
+document.getElementById("month").value = yyyy + "-" + m;
+document.getElementById("selectedDate").value = yyyy + "-" + m + "-" + d;
 
-// আজকের মাস অটো সেট
-
-let today=new Date();
-
-let m=today.getMonth()+1;
-
-if(m<10) m="0"+m;
-
-document.getElementById("month").value=
-today.getFullYear()+"-"+m;
-
-
+// শুরুতে রেন্ডার
 createDuty();
+
+// প্রতি ৩০ সেকেন্ড পরপর ডিউটি স্ট্যাটাস নিজে নিজেই আপডেট হবে
+setInterval(createDuty, 30000);
+
+document.getElementById("month").addEventListener("change", createDuty);
+document.getElementById("selectedDate").addEventListener("change", createDuty);
 
 </script>
 
