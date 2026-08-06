@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Smart Duty Roster</title>
+<title>Smart Duty Roster with Live Countdown</title>
 
 <style>
 body{
@@ -29,53 +29,17 @@ h2{
     margin-top: 0;
 }
 
-/* উপরে সময় ও মাস গণনার হেডার সেকশন */
-.top-header {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
+/* বর্তমান সময় প্রদর্শনের ঘড়ি */
 .live-clock {
-    flex: 1 1 250px;
     background: #1565c0;
     color: white;
     text-align: center;
     padding: 12px;
     border-radius: 10px;
-    font-size: 1rem;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
     font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* ডান দিকে মাসের হিসাব কার্ড */
-.month-tracker {
-    flex: 0 1 220px;
-    background: #e3f2fd;
-    border: 1px solid #bbdefb;
-    color: #0d47a1;
-    text-align: center;
-    padding: 10px 12px;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-}
-
-.month-tracker-title {
-    font-weight: bold;
-    border-bottom: 1px dashed #90caf9;
-    padding-bottom: 4px;
-    margin-bottom: 6px;
-    color: #1565c0;
-}
-
-.month-tracker-info {
-    font-size: 0.95rem;
-    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .controls{
@@ -160,10 +124,19 @@ th{
 .badge-off { background: #e53935; color: white; }
 
 .timer-text {
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: bold;
     color: #2e7d32;
     margin-top: 5px;
-    font-weight: bold;
+    background: #e8f5e9;
+    padding: 4px 8px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.upcoming-timer {
+    color: #1565c0;
+    background: #e3f2fd;
 }
 </style>
 
@@ -173,17 +146,11 @@ th{
 
 <div class="container">
 
-<h2>আবুল কালাম আজাদ</h2>
+<h2>স্মার্ট ডিউটি রোস্টার</h2>
 
-<!-- লাইভ টাইম ক্লক ও ডান পাশের মাস ট্র্যাক সেকশন -->
-<div class="top-header">
-    <div class="live-clock" id="liveClock">
-        বর্তমান সময়: লোড হচ্ছে...
-    </div>
-    <div class="month-tracker" id="monthTracker">
-        <div class="month-tracker-title">📅 মাসের হিসাব</div>
-        <div class="month-tracker-info" id="monthTrackerText">লোড হচ্ছে...</div>
-    </div>
+<!-- লাইভ টাইম ক্লক -->
+<div class="live-clock" id="liveClock">
+    বর্তমান সময়: লোড হচ্ছে...
 </div>
 
 <div class="controls">
@@ -220,53 +187,34 @@ th{
 
 const shifts = [
     { name: "Shift 1", startHour: 6, endHour: 14, isOvernight: false, timeText: "06:00 AM - 02:00 PM" },
-    { name: "Shift 2", startHour: 14, endHour: 22, isOvernight: false, timeText: "02:00 PM - 10:00 PM" },
-    { name: "Shift 3", startHour: 22, endHour: 6, isOvernight: true, timeText: "10:00 PM - 06:00 AM" }
+    { name: "Shift 2", startHour: 22, endHour: 6, isOvernight: true, timeText: "10:00 PM - 06:00 AM" },
+    { name: "Shift 3", startHour: 14, endHour: 22, isOvernight: false, timeText: "02:00 PM - 10:00 PM" }
 ];
 
 function padTwo(num) {
     return num.toString().padStart(2, '0');
 }
 
-// সংখ্যাকে বাংলায় রূপান্তর
-function toBengaliNum(num) {
-    const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
-    return num.toString().split('').map(d => bengaliDigits[d] || d).join('');
-}
-
-// লাইভ ঘড়ি ও ডান দিকের মাসের হিসাব আপডেট
 function updateClock() {
     const now = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
     document.getElementById("liveClock").innerText = "বর্তমান সময়: " + now.toLocaleDateString("bn-BD", options);
-
-    // মাস গণনা আপডেট
-    const currentDay = now.getDate();
-    const totalDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    const remainingDays = totalDaysInMonth - currentDay;
-
-    document.getElementById("monthTrackerText").innerHTML = `
-        আজ: <strong>${toBengaliNum(padTwo(currentDay))}</strong> / ${toBengaliNum(totalDaysInMonth)} তম দিন<br>
-        <span style="font-size: 0.85rem; color: #c62828;">বাকি: <strong>${toBengaliNum(remainingDays)}</strong> দিন</span>
-    `;
 }
 
-// রেফারেন্স ডেট: ১ আগস্ট ২০২৬ এ Shift 1 (সকাল ৬টা - দুপুর ২টা)
-const baseDate = new Date(2026, 7, 1); // 7 = August (১ আগস্ট)
-
-function getShiftForDate(targetDate) {
-    if (targetDate.getDay() === 5) {
-        return { isOff: true };
-    }
-
-    const diffTime = targetDate.getTime() - baseDate.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 3600 * 24));
-
-    let shiftBlock = Math.floor(diffDays / 6) % 3;
-    if (shiftBlock < 0) shiftBlock += 3;
-
-    return { isOff: false, shiftIndex: shiftBlock };
+// চলতি সপ্তাহের শনিবারের তারিখ নির্ধারণ করার ফাংশন
+function getBaseSaturday() {
+    let now = new Date();
+    let day = now.getDay(); 
+    // দিন সূচক: রবি=0, সোম=1, মঙ্গল=2, বুধ=3, বৃহস্পতি=4, শুক্র=5, শনি=6
+    let diffToSaturday = (day === 6) ? 0 : -(day + 1);
+    let sat = new Date(now);
+    sat.setDate(now.getDate() + diffToSaturday);
+    sat.setHours(0, 0, 0, 0);
+    return sat;
 }
+
+// চলতি সপ্তাহের শনিবারকে রেফারেন্স ধরা হয়েছে (বর্তমানে Shift 1 চলছে)
+const baseSaturday = getBaseSaturday();
 
 function createDuty(){
     let monthValue = document.getElementById("month").value;
@@ -283,18 +231,13 @@ function createDuty(){
 
     let targetDay = dateValue ? new Date(dateValue).getDate() : null;
     let targetMonth = dateValue ? new Date(dateValue).getMonth() + 1 : null;
+    let targetYear = dateValue ? new Date(dateValue).getFullYear() : null;
 
     const now = new Date();
 
     for(let d = 1; d <= days; d++){
-        if (targetDay && targetMonth && (targetDay !== d || targetMonth !== parseInt(month))) {
-            continue;
-        }
-
         let date = new Date(year, month - 1, d);
         let dayName = date.toLocaleDateString("bn-BD", { weekday: "long" });
-
-        let shiftInfo = getShiftForDate(date);
 
         let duty = "";
         let timeText = "";
@@ -302,16 +245,27 @@ function createDuty(){
         let statusBadge = "";
         let timerInfo = "";
 
-        if(shiftInfo.isOff){
+        // শুক্রবার Off Day
+        let isOffDay = (date.getDay() === 5);
+
+        // শনিবার থেকে শুক্রবার পর্যন্ত সপ্তাহ গণনার লজিক
+        let diffMs = date - baseSaturday;
+        let diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        let weekIndex = Math.floor(diffDays / 7);
+        
+        // প্রতি শুক্রবারে শিফট চেঞ্জ হবে (নেগেটিভ সংখ্যা হ্যান্ডেল করার জন্য)
+        let currentShiftIdx = ((weekIndex % 3) + 3) % 3;
+
+        if(isOffDay){
             duty = "OFF DAY";
             timeText = "-";
             cls = "off";
             statusBadge = `<span class="badge badge-off">ছুটি</span>`;
         } else {
-            let currentShift = shifts[shiftInfo.shiftIndex];
+            let currentShift = shifts[currentShiftIdx];
             duty = currentShift.name;
             timeText = currentShift.timeText;
-            cls = "shift" + (shiftInfo.shiftIndex + 1);
+            cls = "shift" + (currentShiftIdx + 1);
 
             let shiftStart = new Date(year, month - 1, d, currentShift.startHour, 0, 0);
             let shiftEnd = new Date(year, month - 1, d, currentShift.endHour, 0, 0);
@@ -325,8 +279,9 @@ function createDuty(){
             } else if (now >= shiftStart && now <= shiftEnd) {
                 statusBadge = `<span class="badge badge-running">ডিউটি রানিং</span>`;
                 
-                let diffMs = shiftEnd - now;
-                let diffSecs = Math.floor(diffMs / 1000);
+                let diff = shiftEnd - now;
+                let diffSecs = Math.floor(diff / 1000);
+
                 let hrs = Math.floor(diffSecs / 3600);
                 let mins = Math.floor((diffSecs % 3600) / 60);
                 let secs = diffSecs % 60;
@@ -336,26 +291,30 @@ function createDuty(){
                 statusBadge = `<span class="badge badge-upcoming">আসন্ন ডিউটি</span>`;
                 
                 if(now.toDateString() === date.toDateString()){
-                    let diffMs = shiftStart - now;
-                    let diffSecs = Math.floor(diffMs / 1000);
+                    let diff = shiftStart - now;
+                    let diffSecs = Math.floor(diff / 1000);
+                    
                     if (diffSecs > 0) {
                         let hrs = Math.floor(diffSecs / 3600);
                         let mins = Math.floor((diffSecs % 3600) / 60);
                         let secs = diffSecs % 60;
-                        timerInfo = `<div class="timer-text">⏱️ শুরু হতে বাকি: ${padTwo(hrs)}:${padTwo(mins)}:${padTwo(secs)}</div>`;
+                        timerInfo = `<div class="timer-text upcoming-timer">⏱️ শুরু হতে বাকি: ${padTwo(hrs)}:${padTwo(mins)}:${padTwo(secs)}</div>`;
                     }
                 }
             }
         }
 
-        html += `
-        <tr class="${cls}">
-            <td>${d}-${month}-${year}</td>
-            <td>${dayName}</td>
-            <td><strong>${duty}</strong><br><small>${timeText}</small></td>
-            <td>${statusBadge} ${timerInfo}</td>
-        </tr>
-        `;
+        // দিন বা মাস ফিল্টারিং
+        if (!dateValue || (targetDay === d && targetMonth === parseInt(month) && targetYear === parseInt(year))) {
+            html += `
+            <tr class="${cls}">
+                <td>${padTwo(d)}-${padTwo(month)}-${year}</td>
+                <td>${dayName}</td>
+                <td><strong>${duty}</strong><br><small>${timeText}</small></td>
+                <td>${statusBadge}<br>${timerInfo}</td>
+            </tr>
+            `;
+        }
     }
 
     if(html === "") {
@@ -370,29 +329,26 @@ function showAllMonth(){
     createDuty();
 }
 
-// আজকের প্রাথমিক মান সেট
 let today = new Date();
-let m = today.getMonth() + 1;
-if(m < 10) m = "0" + m;
-
-let d = today.getDate();
-if(d < 10) d = "0" + d;
-
+let m = padTwo(today.getMonth() + 1);
+let d = padTwo(today.getDate());
 let yyyy = today.getFullYear();
 
 document.getElementById("month").value = yyyy + "-" + m;
 document.getElementById("selectedDate").value = yyyy + "-" + m + "-" + d;
 
-// লাইভ টাইমার আপডেট
-createDuty();
 updateClock();
+createDuty();
 
 setInterval(() => {
     updateClock();
     createDuty();
 }, 1000);
 
-document.getElementById("month").addEventListener("change", createDuty);
+document.getElementById("month").addEventListener("change", function() {
+    document.getElementById("selectedDate").value = "";
+    createDuty();
+});
 document.getElementById("selectedDate").addEventListener("change", createDuty);
 
 </script>
