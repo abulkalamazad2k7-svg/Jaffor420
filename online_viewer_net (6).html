@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smart Duty Roster with Live Countdown</title>
+
+<style>
+body{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background:#eef2f5;
+    padding:20px;
+    margin:0;
+}
+
+.container{
+    max-width:750px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.1);
+}
+
+h2{
+    text-align:center;
+    color:#1565c0;
+    margin-top: 0;
+}
+
+/* বর্তমান সময় প্রদর্শনের ঘড়ি */
+.live-clock {
+    background: #1565c0;
+    color: white;
+    text-align: center;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.controls{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+input, button{
+    padding:10px 15px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size: 14px;
+}
+
+button{
+    background:#1565c0;
+    color:white;
+    cursor:pointer;
+    border: none;
+    font-weight: bold;
+    transition: background 0.3s;
+    margin-top: auto;
+}
+
+button:hover{
+    background:#0d47a1;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+}
+
+th, td{
+    border:1px solid #e0e0e0;
+    padding:12px 8px;
+    text-align:center;
+    font-size: 14px;
+}
+
+th{
+    background:#1565c0;
+    color:white;
+}
+
+.off{
+    background:#ffebee;
+    color:#c62828;
+    font-weight:bold;
+}
+
+.shift1{ background:#e3f2fd; }
+.shift2{ background:#fff3e0; }
+.shift3{ background:#ede7f6; }
+
+/* স্ট্যাটাস ব্যাজসমূহ */
+.badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.badge-running { background: #4caf50; color: white; }
+.badge-finished { background: #9e9e9e; color: white; }
+.badge-upcoming { background: #00acc1; color: white; }
+.badge-off { background: #e53935; color: white; }
+
+.timer-text {
+    font-size: 12px;
+    font-weight: bold;
+    color: #2e7d32;
+    margin-top: 5px;
+    background: #e8f5e9;
+    padding: 4px 8px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+/* সময় অনুযায়ী নোটিশ কার্ডের স্টাইল */
+.notice-card {
+    margin-top: 20px;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-left: 5px solid #1565c0;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.notice-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #1565c0;
+    margin-bottom: 8px;
+}
+
+.current-task-box {
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    color: #1b5e20;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.health-tips {
+    background: #fff8e1;
+    color: #f57f17;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #ffe082;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>আবুল কালাম আজাদ</h2>
+
+<!-- লাইভ টাইম ক্লক -->
+<div class="live-clock" id="liveClock">
+    বর্তমান সময়: লোড হচ্ছে...
+</div>
+
+<div class="controls">
+    <div class="control-group">
+        <label>মাস:</label>
+        <input type="month" id="month">
+    </div>
+    <div class="control-group">
+        <label>তারিখ (একদিনের জন্য):</label>
+        <input type="date" id="selectedDate">
+    </div>
+    <button onclick="createDuty()">ফিল্টার করুন</button>
+    <button onclick="showAllMonth()" style="background:#455a64;">পুরা মাস দেখুন</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>তারিখ</th>
+<th>বার</th>
+<th>ডিউটি ও সময়</th>
+<th>অবস্থা (স্ট্যাটাস)</th>
+</tr>
+</thead>
+
+<tbody id="result"></tbody>
+
+</table>
+
+<!-- সময় অনুযায়ী ভেসে ওঠার নোটিশ বক্স -->
+<div id="noticeContainer"></div>
+
+</div>
+
+
+<script>
+
+const joinDate = new Date(); 
+
+const shifts = [
+    { 
+        name: "Shift 1", 
+        startHour: 6, 
+        endHour: 14, 
+        isOvernight: false, 
+        timeText: "06:00 AM - 02:00 PM",
+        routine: [
+            { start: "06:00", end: "07:00", text: "০৬:০০ - ০৭:০০ | ডিউটি গ্রহণ, এলাকা চেক, গেট/পোস্টের অবস্থা দেখা" },
+            { start: "07:00", end: "09:00", text: "০৭:০০ - ০৯:০০ | নিয়মিত পাহারা, টহল, আগত-যাতায়াত লক্ষ্য করা" },
+            { start: "09:00", end: "09:15", text: "০৯:০০ - ০৯:১৫ | পানি পান ও ছোট বিরতি" },
+            { start: "09:15", end: "11:00", text: "০৯:১৫ - ১১:০০ | ডিউটি চালিয়ে যাওয়া, নিরাপত্তা পর্যবেক্ষণ" },
+            { start: "11:00", end: "12:00", text: "১১:০০ - ১২:০০ | টহল ও প্রয়োজনীয় নোট লেখা" },
+            { start: "12:00", end: "13:30", text: "১২:০০ - ০১:৩০ | সতর্কভাবে পাহারা, গুরুত্বপূর্ণ স্থানগুলো চেক করা" },
+            { start: "13:30", end: "14:00", text: "০১:৩০ - ০২:০০ | রিপোর্ট লেখা ও পরবর্তী গার্ডকে দায়িত্ব বুঝিয়ে দেওয়া" }
+        ],
+        tips: "পর্যাপ্ত পানি পান করুন এবং সকালে পুষ্টিকর খাবার খেয়ে ডিউটি শুরু করুন।"
+    },
+    { 
+        name: "Shift 2", 
+        startHour: 22, 
+        endHour: 6, 
+        isOvernight: true, 
+        timeText: "10:00 PM - 06:00 AM",
+        routine: [
+            { start: "22:00", end: "23:00", text: "১০:০০ - ১১:০০ | দায়িত্ব গ্রহণ, পুরো এলাকা ভালোভাবে দেখা" },
+            { start: "23:00", end: "01:00", text: "১১:০০ - ০১:০০ | পাহারা, টহল, গেট পর্যবেক্ষণ" },
+            { start: "01:00", end: "01:15", text: "০১:০০ - ০১:১৫ | পানি পান, হালকা হাঁটাহাঁটি" },
+            { start: "01:15", end: "03:00", text: "০১:১৫ - ০৩:০০ | সতর্ক অবস্থায় ডিউটি, নিয়মিত চেক" },
+            { start: "03:00", end: "04:00", text: "০৩:০০ - ০৪:০০ | টহল, ঘুমভাব এলে হাঁটাহাঁটি করা" },
+            { start: "04:00", end: "05:30", text: "০৪:০০ - ০৫:৩০ | ভোরের আগে গুরুত্বপূর্ণ জায়গা পরীক্ষা" },
+            { start: "05:30", end: "06:00", text: "০৫:৩০ - ০৬:০০ | রিপোর্ট তৈরি ও দায়িত্ব হস্তান্তর" }
+        ],
+        tips: "রাতে ঘুমভাব এলে হাঁটাহাঁটি করুন। দিনে ঘুমানোর জন্য শান্ত ও অন্ধকার জায়গা বেছে নিন।"
+    },
+    { 
+        name: "Shift 3", 
+        startHour: 14, 
+        endHour: 22, 
+        isOvernight: false, 
+        timeText: "02:00 PM - 10:00 PM",
+        routine: [
+            { start: "14:00", end: "15:00", text: "০২:০০ - ০৩:০০ | ডিউটি গ্রহণ, এলাকা পরীক্ষা" },
+            { start: "15:00", end: "17:00", text: "০৩:০০ - ০৫:০০ | পাহারা, আগত লোকজন ও যানবাহন লক্ষ্য করা" },
+            { start: "17:00", end: "17:15", text: "০৫:০০ - ০৫:১৫ | পানি পান ও ছোট বিরতি" },
+            { start: "17:15", end: "19:00", text: "০৫:১৫ - ০৭:০০ | নিয়মিত টহল ও নিরাপত্তা দেখা" },
+            { start: "19:00", end: "20:30", text: "০৭:০০ - ০৮:৩০ | বেশি সতর্ক থাকা, গেট/এলাকা পর্যবেক্ষণ" },
+            { start: "20:30", end: "21:30", text: "০৮:৩০ - ০৯:৩০ | শেষ পর্যায়ের চেক ও রিপোর্ট প্রস্তুতি" },
+            { start: "21:30", end: "22:00", text: "০৯:৩০ - ১০:০০ | দায়িত্ব বুঝিয়ে দেওয়া" }
+        ],
+        tips: "ভারী বা তেল-মশলাযুক্ত খাবার এড়িয়ে চলুন। মাঝেমধ্যে শরীর স্ট্রেচ করুন।"
+    }
+];
+
+function padTwo(num) {
+    return num.toString().padStart(2, '0');
+}
+
+function updateClock() {
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    document.getElementById("liveClock").innerText = "বর্তমান সময়: " + now.toLocaleDateString("bn-BD", options);
+}
+
+function getBaseSaturday() {
+    let now = new Date();
+    let day = now.getDay(); 
+    let diffToSaturday = (day === 6) ? 0 : -(day + 1);
+    let sat = new Date(now);
+    sat.setDate(now.getDate() + diffToSaturday);
+    sat.setHours(0, 0, 0, 0);
+    return sat;
+}
+
+const baseSaturday = getBaseSaturday();
+
+function createDuty(){
+    let monthValue = document.getElementById("month").value;
+    let dateValue = document.getElementById("selectedDate").value;
+
+    if(!monthValue){
+        alert("মাস নির্বাচন করুন");
+        return;
+    }
+
+    let [year, month] = monthValue.split("-");
+    let days = new Date(year, month, 0).getDate();
+    let html = "";
+
+    let targetDay = dateValue ? new Date(dateValue).getDate() : null;
+    let targetMonth = dateValue ? new Date(dateValue).getMonth() + 1 : null;
+    let targetYear = dateValue ? new Date(dateValue).getFullYear() : null;
+
+    const now = new Date();
+    let activeShiftForNotice = null;
+
+    for(let d = 1; d <= days; d++){
+        let date = new Date(year, month - 1, d);
+        let dayName = date.toLocaleDateString("bn-BD", { weekday: "long" });
+
+        let duty = "";
+        let timeText = "";
+        let cls = "";
+        let statusBadge = "";
+        let timerInfo = "";
+
+        let diffTimeFromJoin = Math.abs(date - joinDate);
+        let diffDaysFromJoin = Math.ceil(diffTimeFromJoin / (1000 * 60 * 60 * 24));
+        let isProbationPeriod = (diffDaysFromJoin <= 90);
+
+        let isOffDay = (date.getDay() === 5) && !isProbationPeriod;
+
+        let diffMs = date - baseSaturday;
+        let diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        let weekIndex = Math.floor(diffDays / 7);
+        
+        let currentShiftIdx = (((weekIndex + 1) % 3) + 3) % 3;
+
+        if(isOffDay){
+            duty = "OFF DAY";
+            timeText = "-";
+            cls = "off";
+            statusBadge = `<span class="badge badge-off">ছুটি</span>`;
+        } else {
+            let currentShift = shifts[currentShiftIdx];
+            duty = currentShift.name;
+            timeText = currentShift.timeText;
+            cls = "shift" + (currentShiftIdx + 1);
+
+            let shiftStart = new Date(year, month - 1, d, currentShift.startHour, 0, 0);
+            let shiftEnd = new Date(year, month - 1, d, currentShift.endHour, 0, 0);
+
+            if (currentShift.isOvernight) {
+                shiftEnd.setDate(shiftEnd.getDate() + 1);
+            }
+
+            let isRunningNow = false;
+            if (currentShift.isOvernight) {
+                let prevStart = new Date(shiftStart);
+                prevStart.setDate(prevStart.getDate() - 1);
+                let prevEnd = new Date(shiftEnd);
+                prevEnd.setDate(prevEnd.getDate() - 1);
+
+                if (now >= prevStart && now <= prevEnd) {
+                    shiftStart = prevStart;
+                    shiftEnd = prevEnd;
+                    isRunningNow = true;
+                } else if (now >= shiftStart && now <= shiftEnd) {
+                    isRunningNow = true;
+                }
+            } else if (now >= shiftStart && now <= shiftEnd) {
+                isRunningNow = true;
+            }
+
+            if (isRunningNow) {
+                statusBadge = `<span class="badge badge-running">ডিউটি রানিং</span>`;
+                
+                let diff = shiftEnd - now;
+                let diffSecs = Math.floor(diff / 1000);
+
+                let hrs = Math.floor(diffSecs / 3600);
+                let mins = Math.floor((diffSecs % 3600) / 60);
+                let secs = diffSecs % 60;
+
+                timerInfo = `<div class="timer-text">⏳ শেষ হতে বাকি: ${padTwo(hrs)}:${padTwo(mins)}:${padTwo(secs)}</div>`;
+            } else if (now > shiftEnd) {
+                statusBadge = `<span class="badge badge-finished">ডিউটি শেষ</span>`;
+            } else {
+                // আপকামিং কাউন্টডাউন টেক্সট সরিয়ে শুধুমাত্র সাধারণ ব্যাজ রাখা হলো
+                statusBadge = `<span class="badge badge-upcoming">ডিউটি নির্ধারিত</span>`;
+                timerInfo = ""; 
+            }
+        }
+
+        if (!dateValue || (targetDay === d && targetMonth === parseInt(month) && targetYear === parseInt(year))) {
+            html += `
+            <tr class="${cls}">
+                <td>${padTwo(d)}-${padTwo(month)}-${year}</td>
+                <td>${dayName}</td>
+                <td><strong>${duty}</strong><br><small>${timeText}</small></td>
+                <td>${statusBadge}<br>${timerInfo}</td>
+            </tr>
+            `;
+
+            if(activeShiftForNotice === null) {
+                activeShiftForNotice = isOffDay ? "OFF" : shifts[currentShiftIdx];
+            }
+        }
+    }
+
+    if(html === "") {
+        html = `<tr><td colspan="4">এই তারিখে কোনো তথ্য পাওয়া যায়নি</td></tr>`;
+    }
+
+    document.getElementById("result").innerHTML = html;
+
+    updateNoticeCard(activeShiftForNotice);
+}
+
+function updateNoticeCard(shiftInfo) {
+    let noticeContainer = document.getElementById("noticeContainer");
+
+    if(!shiftInfo) {
+        noticeContainer.innerHTML = "";
+        return;
+    }
+
+    if(shiftInfo === "OFF") {
+        noticeContainer.innerHTML = `
+        <div class="notice-card" style="border-left-color: #e53935;">
+            <div class="notice-title" style="color: #c62828;">📢 আজকের নোটিশ (সাপ্তাহিক ছুটি)</div>
+            <p style="margin: 0; color: #555; font-size: 14px;">আজ আপনার সাপ্তাহিক ছুটির দিন। পর্যাপ্ত বিশ্রাম নিন এবং পরিবারের সাথে সময় কাটান।</p>
+        </div>`;
+        return;
+    }
+
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+
+    let currentTask = "বর্তমানে কোনো নির্ধারিত রুটিনের কাজ নেই (বা শিফটের বাইরের সময়)।";
+
+    for(let item of shiftInfo.routine) {
+        let [sH, sM] = item.start.split(":").map(Number);
+        let [eH, eM] = item.end.split(":").map(Number);
+
+        let startMins = sH * 60 + sM;
+        let endMins = eH * 60 + eM;
+
+        if(endMins < startMins) {
+            if(currentMins >= startMins || currentMins < endMins) {
+                currentTask = item.text;
+                break;
+            }
+        } else {
+            if(currentMins >= startMins && currentMins < endMins) {
+                currentTask = item.text;
+                break;
+            }
+        }
+    }
+
+    noticeContainer.innerHTML = `
+    <div class="notice-card">
+        <div class="notice-title">⏱️ বর্তমান সময়ের নির্ধারিত কাজ (${shiftInfo.name}):</div>
+        <div class="current-task-box">📌 ${currentTask}</div>
+        <div class="health-tips">💡 <strong>স্বাস্থ্য পরামর্শ:</strong> ${shiftInfo.tips}</div>
+    </div>`;
+}
+
+function showAllMonth(){
+    document.getElementById("selectedDate").value = "";
+    createDuty();
+}
+
+let today = new Date();
+let m = padTwo(today.getMonth() + 1);
+let d = padTwo(today.getDate());
+let yyyy = today.getFullYear();
+
+document.getElementById("month").value = yyyy + "-" + m;
+document.getElementById("selectedDate").value = yyyy + "-" + m + "-" + d;
+
+updateClock();
+createDuty();
+
+setInterval(() => {
+    updateClock();
+    createDuty();
+}, 1000);
+
+document.getElementById("month").addEventListener("change", function() {
+    document.getElementById("selectedDate").value = "";
+    createDuty();
+});
+document.getElementById("selectedDate").addEventListener("change", createDuty);
+
+</script>
+
+</body>
+</html>
